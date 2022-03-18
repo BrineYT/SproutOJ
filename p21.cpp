@@ -1,84 +1,78 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
 struct node {
-  node *last = nullptr;
-  node *next = nullptr;
-  int id;
+    node *last = nullptr, *next = nullptr;
+    int id;
 
-  void removeSelf() {
-    last->next = this->next;
-    next->last = this->last;
-  }
+    node(int id): id(id) {}
 
-  void swap() {
-    if (this->last) {
-      node *a = last->last;
-      node *d = next;
-      last->last->next = this;
-      next->last = last;
-      last->last = this;
+    void removeSelf() {
+        if (last) last->next = this->next;
+        if (next) next->last = this->last;
     }
-  }
 
-  void print() {
-    cout << this->id << ' ';
-    if (this->next) {
-      next->print();
-    } else {
-      cout << '\n';
+    void customSwap() {
+        swap(this->id, last->id);
     }
-  }
+
+    void print() {
+        if (this->next) {
+            cout << this->id << ' ';
+            next->print();
+        } else {
+            cout << this->id << '\n';
+        }
+    }
 };
 
 void evaluate(const int, const int);
 
 int main() {
-  int racer, action;
-  cin >> racer >> action;
+    ios_base::sync_with_stdio(0), cin.tie(0), cout.tie(0);
 
-  evaluate(racer, action);
+    int racer, action;
+    cin >> racer >> action;
+
+    evaluate(racer, action);
 }
 
+
 void evaluate(const int racer, const int action) {
-  vector<node> player;
-  player.push_back({nullptr, nullptr, 0});
-  player.push_back({nullptr, nullptr, 1});
+    vector<node*> player;
 
-  int start = 1;
-
-  for (int i = 1; i < racer; ++i) {
-    player.push_back({nullptr, nullptr, i + 1});
-  }
-  for (int i = racer - 1; i > 0; --i) {
-    player[i].next = &player[i + 1];
-  }
-  for (int i = 2; i <= racer; ++i) {
-    player[i].last = &player[i - 1];
-  }
-
-  for (auto &n: player) {
-    cout << n.last << ' ' << &n << ' ' << n.next << ' ' << n.id << '\n';
-  }
-
-  int command, target;
-  for (int i = 0; i < action; ++i) {
-    cin >> command >> target;
-
-    if (command) {
-      if (player[target].last && player[target].last->last == nullptr) {
-        start = target;
-      }
-      player[target].swap();
-    } else {
-      if (target == start) {
-        start = player[start].next->id;
-      }
-      player[target].removeSelf();
+    for (int i = 0; i <= racer; ++i) {
+        node* temp = new node(i);
+        player.push_back(temp);
     }
-  }
+    for (int i = 2; i < racer; ++i) {
+        player[i]->last = player[i - 1];
+        player[i]->next = player[i + 1];
+    }
+    player[1]->next = player[2];
+    player[racer]->last = player[racer - 1];
 
-  player[start].print();
+    int start = 1, command, target;
+    for (int i = 0; i < action; ++i) {
+        cin >> command >> target;
+
+        if (command) {
+            if (target == start) continue;
+            if (!player[target]->last->last) start = target;
+            player[target]->customSwap();
+
+            int &next = player[target]->id;
+            swap(player[target], player[next]);
+        } else {
+            if (target == start) {
+                start = player[start]->next->id;
+            }
+            player[target]->removeSelf();
+        }
+    }
+
+    player[start]->print();
 }

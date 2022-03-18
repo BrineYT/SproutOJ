@@ -3,30 +3,22 @@
 using namespace std;
 
 struct node {
-    node *lChild = nullptr, *rChild = nullptr;
+    node *child[2] = {nullptr};
     int id;
 
     node(int input): id(input) {};
 
     void push(node *next) {
-        if (next->id < this->id) {
-            if (this->lChild) {
-                lChild->push(next);
-            } else {
-                lChild = next;
-            }
-        } else {
-            if (this->rChild) {
-                rChild->push(next);
-            } else {
-                rChild = next;
-            }
-        }
+        bool direction = next->id > this->id;
+
+        if (child[direction]) 
+            child[direction]->push(next);
+        else 
+            child[direction] = next;
     }
 
     void print() {
-        if (lChild) lChild->print();
-        if (rChild) rChild->print();
+        for (node *n: child) if (n) n->print();
         cout << id << '\n';
     }
 };
